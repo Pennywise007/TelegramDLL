@@ -116,7 +116,10 @@
       <Command>echo copy "$(TargetPath)" "$(MyDLLDir)$(ProjectName)\$(TargetFileName)"
 copy "$(TargetPath)" "$(MyDLLDir)$(ProjectName)\$(TargetName)$(TargetExt)"
 
-echo copy "$(OutputPath)$(ProjectName).lib" "$(MyLibDir)$(ProjectName)\$(ProjectName)d.lib"
+echo copy "$(OutputPath)$(TargetName).pdb" "$(MyDLLDir)$(ProjectName)\$(TargetName).pdb"
+copy "$(OutputPath)$(TargetName).pdb" "$(MyDLLDir)$(ProjectName)\$(TargetName).pdb"
+
+echo copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
 copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
 
 echo copy "$(ProjectDir)$(ProjectName).h" "$(MyIncludeDir)$(ProjectName)\$(ProjectName).h"
@@ -179,8 +182,11 @@ copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThre
       <Command>echo copy "$(TargetPath)" "$(MyDLLDir)$(ProjectName)\$(TargetFileName)"
 copy "$(TargetPath)" "$(MyDLLDir)$(ProjectName)\$(TargetName)$(TargetExt)"
 
-echo copy "$(OutputPath)$(ProjectName).lib" "$(MyLibDir)$(ProjectName)\$(ProjectName)d.lib"
-copy "$(OutputPath)$(ProjectName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
+echo copy "$(OutputPath)$(TargetName).pdb" "$(MyDLLDir)$(ProjectName)\$(TargetName).pdb"
+copy "$(OutputPath)$(TargetName).pdb" "$(MyDLLDir)$(ProjectName)\$(TargetName).pdb"
+
+echo copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
+copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
 
 echo copy "$(ProjectDir)$(ProjectName).h" "$(MyIncludeDir)$(ProjectName)\$(ProjectName).h"
 copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"</Command>

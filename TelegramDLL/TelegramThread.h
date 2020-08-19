@@ -76,5 +76,15 @@ interface DLLIMPORT_EXPORT ITelegramThread
 typedef std::unique_ptr<ITelegramThread> ITelegramThreadPtr;
 
 // создаем экземпл€р нашего класса
-inline DLLIMPORT_EXPORT ITelegramThreadPtr CreateTelegramThread(
-    const std::string& token, ITelegramAllerter* allertInterface = nullptr);
+inline DLLIMPORT_EXPORT
+ITelegramThreadPtr CreateTelegramThread(const std::string& token,
+                                        ITelegramAllerter* allertInterface = nullptr);
+
+// создаем экземпл€р телеграм бота
+inline DLLIMPORT_EXPORT
+std::unique_ptr<TgBot::Bot> CreateTelegramBot(const std::string& token,
+                                              const TgBot::HttpClient& client);
+
+// обработать событие обновлени€ от телеграм канала
+inline DLLIMPORT_EXPORT
+void HandleTgUpdate(const TgBot::EventHandler& handler, TgBot::Update::Ptr update);

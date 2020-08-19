@@ -78,7 +78,6 @@ public:
 
     // получение апи бота
     const TgBot::Api& getBotApi() override;
-
 public:
     // рабочий поток бота телеграма
     std::thread m_telegramThread;
@@ -120,7 +119,7 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
     }
     catch (std::exception& e)
     {
-        sendAllert(telegramData->allertHelper, "Ошибка инициализации, возможно забыли включить прокси, описание ошибки: %s\n", e.what());
+        sendAllert(telegramData->allertHelper, "Ошибка инициализации бота, описание ошибки: %s\n", e.what());
     }
 
     TgLongPoll longPoll(telegramData->bot);
@@ -133,9 +132,12 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
         }
         catch (std::exception& e)
         {
+            if (telegramData->bThreadWorkFlag)
+                break;
+
             TRACE(L"error: %s\n", e.what());
             sendAllert(telegramData->allertHelper, "Ошибка в работе бота: %s\n", e.what());
-            std::this_thread::sleep_for(std::chrono::seconds(10));
+            std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
 
@@ -310,10 +312,24 @@ CString getUNICODEString(const std::string& utf8Str)
 }
 
 //----------------------------------------------------------------------------//
-ITelegramThreadPtr CreateTelegramThread(const std::string& token,
-                                        ITelegramAllerter* allertInterface)
+inline DLLIMPORT_EXPORT ITelegramThreadPtr CreateTelegramThread(const std::string& token,
+                                                                ITelegramAllerter* allertInterface)
 {
     return std::make_unique<TelegramThread>(token, allertInterface);
+}
+
+//----------------------------------------------------------------------------//
+inline DLLIMPORT_EXPORT std::unique_ptr<TgBot::Bot> CreateTelegramBot(const std::string& token,
+                                                                      const TgBot::HttpClient& client)
+{
+    return std::make_unique<TgBot::Bot>(token, client);
+}
+
+//----------------------------------------------------------------------------//
+inline void DLLIMPORT_EXPORT HandleTgUpdate(const TgBot::EventHandler& handler,
+                                            TgBot::Update::Ptr update)
+{
+    handler.handleUpdate(update);
 }
 
 /*
