@@ -12,6 +12,7 @@
 
 #include <string>
 #include <thread>
+#include <unordered_map>
 
 #include "TelegramThread.h"
 
@@ -23,7 +24,8 @@ using namespace TgBot;
 struct WorkTelegramData
 {
     // флаг работы потока
-    std::atomic_bool bThreadWorkFlag;
+    std::atomic_bool bThreadWorkFlag = false;
+
     // бот
     Bot bot;
 
@@ -32,18 +34,17 @@ struct WorkTelegramData
     CurlHttpClient curlHttpClient;
 #endif //HAVE_CURL
 
-    // интерфейс оповещения об ошибке
-    ITelegramAllerter* allertHelper;
+    // колбэк на получение ошибки
+    TelegramErrorHandler errorHandler;
 
     // конструктор
-    WorkTelegramData(const std::string& token, ITelegramAllerter* allertInterface)
+    explicit WorkTelegramData(const std::string& token, TelegramErrorHandler errorHandlerFunction)
         : bot(token
 #ifdef HAVE_CURL
               , curlHttpClient
 #endif // HAVE_CURL
               )
-        , allertHelper(allertInterface)
-        , bThreadWorkFlag(false)
+        , errorHandler(std::move(errorHandlerFunction))
     {}
 };
 
@@ -52,25 +53,25 @@ class TelegramThread : public ITelegramThread
 {
 public:
     // token - токен бота
-    TelegramThread(const std::string& token,
-                   ITelegramAllerter* allertInterface = nullptr);
+    explicit TelegramThread(const std::string& token, const TelegramErrorHandler& errorHandler = nullptr);
+
     ~TelegramThread();
 
 // ITelegramThread
 public:
     // запуск потока
-    void startTelegramThread(const std::map<std::string, CommandFunction>& commandsList,
+    void startTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
                              const CommandFunction& onUnknownCommand = nullptr,
                              const CommandFunction& onNonCommandMessage = nullptr) override;
     // остановка потока
     void stopTelegramThread() override;
 
     // функция отправки сообщений в чаты
-    void sendMessage(const std::list<int64_t>& chatIds, const CString& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
+    void sendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                      GenericReply::Ptr replyMarkup = std::make_shared<GenericReply>(), const std::string& parseMode = "", bool disableNotification = false) override;
 
     // функция отправки сообщения в чат
-    void sendMessage(int64_t chatId, const CString& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
+    void sendMessage(int64_t chatId, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                      GenericReply::Ptr replyMarkup = std::make_shared<GenericReply>(), const std::string& parseMode = "", bool disableNotification = false) override;
 
     // возвращает события бота чтобы самому все обрабатывать
@@ -88,13 +89,13 @@ public:
 
 //----------------------------------------------------------------------------//
 // отправка оповещения об ошибке родителю
-void sendAllert(ITelegramAllerter* allertHelper, const char *format, ...);
-void sendAllert(ITelegramAllerter* allertHelper, const CString& str);
+void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...);
+void sendAlert(const TelegramErrorHandler& errorHandler, const std::wstring& str);
 
 //----------------------------------------------------------------------------//
 TelegramThread::TelegramThread(const std::string& token,
-                               ITelegramAllerter* allertInterface /*= nullptr*/)
-    : m_telegramWorkData(token, allertInterface)
+                               const TelegramErrorHandler& errorHandler /*= nullptr*/)
+    : m_telegramWorkData(token, errorHandler)
 {
 }
 
@@ -119,7 +120,7 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
     }
     catch (std::exception& e)
     {
-        sendAllert(telegramData->allertHelper, "Ошибка инициализации бота, описание ошибки: %s\n", e.what());
+        sendAlert(telegramData->errorHandler, "Ошибка инициализации бота, описание ошибки: %s\n", e.what());
     }
 
     TgLongPoll longPoll(telegramData->bot);
@@ -136,7 +137,7 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
                 break;
 
             TRACE(L"error: %s\n", e.what());
-            sendAllert(telegramData->allertHelper, "Ошибка в работе бота: %s\n", e.what());
+            sendAlert(telegramData->errorHandler, "Ошибка в работе бота: %s\n", e.what());
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
@@ -145,32 +146,29 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::startTelegramThread(const std::map<std::string, CommandFunction>& commandsList,
+void TelegramThread::startTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
                                          const CommandFunction& onUnknownCommand /*= nullptr*/,
                                          const CommandFunction& onNonCommandMessage /*= nullptr*/)
 {
-    for (auto& command : commandsList)
-    {
-        m_telegramWorkData.bot.getEvents().onCommand(command.first, command.second);
-    }
-
+    m_telegramWorkData.bot.getEvents().getCommandListeners() = commandsList;
     m_telegramWorkData.bot.getEvents().onUnknownCommand(onUnknownCommand);
     m_telegramWorkData.bot.getEvents().onNonCommandMessage(onNonCommandMessage);
 
     m_telegramWorkData.bThreadWorkFlag = true;
 
-    m_telegramThread = std::thread(&telegramWorkThread, &m_telegramWorkData);
+    assert(!m_telegramThread.joinable() && "Поток телеграма уже запущен!");
+    m_telegramThread.swap(std::thread(&telegramWorkThread, &m_telegramWorkData));
 }
 
 //----------------------------------------------------------------------------//
 void TelegramThread::stopTelegramThread()
 {
     m_telegramWorkData.bThreadWorkFlag = false;
-    m_telegramWorkData.allertHelper = nullptr;
+    m_telegramWorkData.errorHandler = nullptr;
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::sendMessage(const std::list<int64_t>& chatIds, const CString& msg,
+void TelegramThread::sendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg,
                                  bool disableWebPagePreview, int32_t replyToMessageId,
                                  GenericReply::Ptr replyMarkup, const std::string& parseMode,
                                  bool disableNotification)
@@ -187,13 +185,13 @@ void TelegramThread::sendMessage(const std::list<int64_t>& chatIds, const CStrin
         catch (std::exception& e)
         {
             TRACE("Error sendMessage: %s\n", e.what());
-            sendAllert(m_telegramWorkData.allertHelper, "Ошибка отправки сообщения: %s\n", e.what());
+            sendAlert(m_telegramWorkData.errorHandler, "Ошибка отправки сообщения: %s\n", e.what());
         }
     }
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::sendMessage(int64_t chatId, const CString& msg,
+void TelegramThread::sendMessage(int64_t chatId, const std::wstring& msg,
                                  bool disableWebPagePreview, int32_t replyToMessageId,
                                  GenericReply::Ptr replyMarkup, const std::string& parseMode,
                                  bool disableNotification)
@@ -218,54 +216,57 @@ const TgBot::Api& TelegramThread::getBotApi()
 }
 
 //----------------------------------------------------------------------------//
-void sendAllert(ITelegramAllerter* allertHelper, const char *format, ...)
+void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...)
 {
-    if (!allertHelper)
+    if (!errorHandler)
         return;
 
     va_list arg;
-    int len;
-    char * orig_msg;
 
     /* Compute length of original message */
     va_start(arg, format);
-    len = vsnprintf(NULL, 0, format, arg);
+    const int len = vsnprintf(NULL, 0, format, arg);
     va_end(arg);
 
     /* Allocate space for original message */
-    orig_msg = (char *)calloc(len+1, sizeof(char));
+    std::string str;
+    str.resize(len + 1);
 
     /* Write original message to string */
     va_start(arg, format);
-    vsnprintf(orig_msg, len+1, format, arg);
+    vsnprintf(str.data(), len+1, format, arg);
     va_end(arg);
 
-    allertHelper->onAllertFromTelegram(CString(orig_msg));
-
-    free(orig_msg);
+    errorHandler(std::wstring(CA2W(str.c_str())));
 }
 
 //----------------------------------------------------------------------------//
-void sendAllert(ITelegramAllerter* allertHelper, const CString& str)
+void sendAlert(const TelegramErrorHandler& errorHandler, const std::wstring& str)
 {
-    if (allertHelper)
-        allertHelper->onAllertFromTelegram(str);
+    if (errorHandler)
+        errorHandler(str);
+}
+
+inline DLLIMPORT_EXPORT std::string getUtf8Str(const std::wstring& str)
+{
+    return std::string(CW2A(str.c_str(), CP_UTF8));
 }
 
 //----------------------------------------------------------------------------//
-CString getUNICODEString(const std::string& utf8Str)
+inline DLLIMPORT_EXPORT std::wstring getUNICODEString(const std::string& utf8Str)
 {
+    return std::wstring(CA2W(utf8Str.c_str(), CP_UTF8));
+    /*
     CString cstr;
 
     size_t utf8StrLen = strlen(utf8Str.c_str());
 
     if (utf8StrLen == 0)
     {
-        cstr.Empty();
         return cstr;
     }
 
-    LPTSTR ptr = cstr.GetBuffer(utf8StrLen + 1);
+    const LPTSTR ptr = cstr.GetBuffer(utf8StrLen + 1);
 
 #ifdef UNICODE
     // CString is UNICODE string so we decode
@@ -308,14 +309,24 @@ CString getUNICODEString(const std::string& utf8Str)
 #endif
 
     cstr.ReleaseBuffer(newLen);
-    return cstr;
+    return cstr;*/
 }
 
 //----------------------------------------------------------------------------//
 inline DLLIMPORT_EXPORT ITelegramThreadPtr CreateTelegramThread(const std::string& token,
-                                                                ITelegramAllerter* allertInterface)
+                                                                ITelegramAlerter* alertInterface /*= nullptr*/)
 {
-    return std::make_unique<TelegramThread>(token, allertInterface);
+    if (alertInterface)
+        return std::make_unique<TelegramThread>(token, std::bind(&ITelegramAlerter::onAlertFromTelegram, alertInterface, std::placeholders::_1));
+    else
+        return std::make_unique<TelegramThread>(token);
+}
+
+//----------------------------------------------------------------------------//
+inline DLLIMPORT_EXPORT ITelegramThreadPtr CreateTelegramThread(const std::string& token,
+                                                                const TelegramErrorHandler& alertHandler /*= nullptr*/)
+{
+    return std::make_unique<TelegramThread>(token, alertHandler);
 }
 
 //----------------------------------------------------------------------------//
@@ -326,7 +337,7 @@ inline DLLIMPORT_EXPORT std::unique_ptr<TgBot::Bot> CreateTelegramBot(const std:
 }
 
 //----------------------------------------------------------------------------//
-inline void DLLIMPORT_EXPORT HandleTgUpdate(const TgBot::EventHandler& handler,
+inline DLLIMPORT_EXPORT void HandleTgUpdate(const TgBot::EventHandler& handler,
                                             TgBot::Update::Ptr update)
 {
     handler.handleUpdate(update);
@@ -353,7 +364,7 @@ void sendRequestByCurl()
 
         std::string readBuffer;
         curl_easy_setopt(curl, CURLOPT_URL,
-                         "https://api.telegram.org/bot775186029:AAHh1StDVlvod-oLACt1NuHheJD5j7mTQ4M/sendMessage");
+                         "https://api.telegram.org/bot{token}/sendMessage");
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);

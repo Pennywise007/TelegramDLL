@@ -15,31 +15,33 @@
     #define DLLIMPORT_EXPORT __declspec(dllimport)
 #endif
 
-#include <map>
 #include <memory>
 #include <string>
 #include <functional>
 #include <list>
+#include <unordered_map>
 
 #include <tgbot/tgbot.h>
 
 // преобразуем строку в UTF-8
-inline std::string DLLIMPORT_EXPORT getUtf8Str(const CString& str) { return std::string(CW2A(str, CP_UTF8)); }
+inline DLLIMPORT_EXPORT std::string getUtf8Str(const std::wstring& str);
 
-// преобразуем строку UTF-8 в CString
-inline CString DLLIMPORT_EXPORT getUNICODEString(const std::string& utf8Str);
+// преобразуем строку UTF-8 в std::wstring
+inline DLLIMPORT_EXPORT std::wstring getUNICODEString(const std::string& utf8Str);
 
 //----------------------------------------------------------------------------//
 // интерфейс используемый дл€ получени€ оповещений из телеграм бота
-interface DLLIMPORT_EXPORT ITelegramAllerter
+interface DLLIMPORT_EXPORT ITelegramAlerter
 {
-    virtual ~ITelegramAllerter() = default;
+    virtual ~ITelegramAlerter() = default;
     // оповещение о возникшей ошибке в работе телеграм бота
-    virtual void onAllertFromTelegram(const CString& allertMessage) = 0;
+    virtual void onAlertFromTelegram(const std::wstring& alertMessage) = 0;
 };
 
+typedef std::function<void(const std::wstring&)> TelegramErrorHandler;
 typedef TgBot::Message::Ptr MessagePtr;
 typedef TgBot::EventBroadcaster::MessageListener CommandFunction;
+
 //----------------------------------------------------------------------------//
 interface DLLIMPORT_EXPORT ITelegramThread
 {
@@ -48,7 +50,7 @@ interface DLLIMPORT_EXPORT ITelegramThread
     virtual ~ITelegramThread() = default;
 
     // запуск потока
-    virtual void startTelegramThread(const std::map<std::string, CommandFunction>& commandsList,
+    virtual void startTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
                                      const CommandFunction& onUnknownCommand = nullptr,
                                      const CommandFunction& onNonCommandMessage = nullptr) = 0;
 
@@ -56,13 +58,13 @@ interface DLLIMPORT_EXPORT ITelegramThread
     virtual void stopTelegramThread() = 0;
 
     // функци€ отправки сообщений в чаты
-    virtual void sendMessage(const std::list<int64_t>& chatIds, const CString& msg,
+    virtual void sendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg,
                              bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                              TgBot::GenericReply::Ptr replyMarkup = std::make_shared<TgBot::GenericReply>(),
                              const std::string& parseMode = "", bool disableNotification = false) = 0;
 
     // функци€ отправки сообщени€ в чат
-    virtual void sendMessage(int64_t chatId, const CString& msg, bool disableWebPagePreview = false,
+    virtual void sendMessage(int64_t chatId, const std::wstring& msg, bool disableWebPagePreview = false,
                              int32_t replyToMessageId = 0,
                              TgBot::GenericReply::Ptr replyMarkup = std::make_shared<TgBot::GenericReply>(),
                              const std::string& parseMode = "", bool disableNotification = false) = 0;
@@ -77,12 +79,17 @@ typedef std::unique_ptr<ITelegramThread> ITelegramThreadPtr;
 
 // создаем экземпл€р нашего класса
 inline DLLIMPORT_EXPORT
-ITelegramThreadPtr CreateTelegramThread(const std::string& token,
-                                        ITelegramAllerter* allertInterface = nullptr);
+ITelegramThreadPtr CreateTelegramThread(const std::string& botToken,
+                                        ITelegramAlerter* alertInterface = nullptr);
+
+// создаем экземпл€р нашего класса
+inline DLLIMPORT_EXPORT
+ITelegramThreadPtr CreateTelegramThread(const std::string& botToken,
+                                        const TelegramErrorHandler& errorHandler = nullptr);
 
 // создаем экземпл€р телеграм бота
 inline DLLIMPORT_EXPORT
-std::unique_ptr<TgBot::Bot> CreateTelegramBot(const std::string& token,
+std::unique_ptr<TgBot::Bot> CreateTelegramBot(const std::string& botToken,
                                               const TgBot::HttpClient& client);
 
 // обработать событие обновлени€ от телеграм канала
