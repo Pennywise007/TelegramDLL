@@ -10,6 +10,10 @@
 
 #include "stdafx.h"
 
+#include <ext/trace/tracer.h>
+#include <ext/utils/string.h>
+
+#include <atlconv.h>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -97,6 +101,13 @@ TelegramThread::TelegramThread(const std::string& token,
                                const TelegramErrorHandler& errorHandler /*= nullptr*/)
     : m_telegramWorkData(token, errorHandler)
 {
+    struct thousands_separator : std::numpunct<char>
+    {
+        char_type do_thousands_sep() const override { return '\0'; }
+    };
+
+    // Removing thousands separator from locale, awoid boost::lexical_cast wrong conversion
+    std::locale::global(std::locale(std::ostringstream().getloc(), new thousands_separator()));
 }
 
 //----------------------------------------------------------------------------//
@@ -115,7 +126,7 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
 {
     try
     {
-        TRACE("Bot username: %s\n", telegramData->bot.getApi().getMe()->username.c_str());
+        OutputDebugStringA(std::string_sprintf("Bot username: %s\n", telegramData->bot.getApi().getMe()->username.c_str()).c_str());
         telegramData->bot.getApi().deleteWebhook();
     }
     catch (std::exception& e)
@@ -128,7 +139,7 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
     {
         try
         {
-            TRACE("Long poll started\n");
+            OutputDebugStringA(std::string_sprintf("Long poll started\n").c_str());
             longPoll.start();
         }
         catch (std::exception& e)
@@ -136,7 +147,7 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
             if (telegramData->bThreadWorkFlag)
                 break;
 
-            TRACE(L"error: %s\n", e.what());
+            OutputDebugStringA(std::string_sprintf("error: %s\n", e.what()).c_str());
             sendAlert(telegramData->errorHandler, "Ошибка в работе бота: %s\n", e.what());
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
@@ -150,7 +161,8 @@ void TelegramThread::startTelegramThread(const std::unordered_map<std::string, C
                                          const CommandFunction& onUnknownCommand /*= nullptr*/,
                                          const CommandFunction& onNonCommandMessage /*= nullptr*/)
 {
-    m_telegramWorkData.bot.getEvents().getCommandListeners() = commandsList;
+    for (auto&& [command, function] : commandsList)
+        m_telegramWorkData.bot.getEvents().onCommand(command, function);
     m_telegramWorkData.bot.getEvents().onUnknownCommand(onUnknownCommand);
     m_telegramWorkData.bot.getEvents().onNonCommandMessage(onNonCommandMessage);
 
@@ -184,7 +196,7 @@ void TelegramThread::sendMessage(const std::list<int64_t>& chatIds, const std::w
         }
         catch (std::exception& e)
         {
-            TRACE("Error sendMessage: %s\n", e.what());
+            OutputDebugStringA(std::string_sprintf("Error sendMessage: %s\n", e.what()).c_str());
             sendAlert(m_telegramWorkData.errorHandler, "Ошибка отправки сообщения: %s\n", e.what());
         }
     }
@@ -237,7 +249,7 @@ void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...
     vsnprintf(str.data(), len+1, format, arg);
     va_end(arg);
 
-    errorHandler(std::wstring(CA2W(str.c_str())));
+    errorHandler(std::wstring(ATL::CA2W(str.c_str())));
 }
 
 //----------------------------------------------------------------------------//
@@ -249,13 +261,13 @@ void sendAlert(const TelegramErrorHandler& errorHandler, const std::wstring& str
 
 inline DLLIMPORT_EXPORT std::string getUtf8Str(const std::wstring& str)
 {
-    return std::string(CW2A(str.c_str(), CP_UTF8));
+    return std::string(ATL::CW2A(str.c_str(), CP_UTF8));
 }
 
 //----------------------------------------------------------------------------//
 inline DLLIMPORT_EXPORT std::wstring getUNICODEString(const std::string& utf8Str)
 {
-    return std::wstring(CA2W(utf8Str.c_str(), CP_UTF8));
+    return std::wstring(ATL::CA2W(utf8Str.c_str(), CP_UTF8));
     /*
     CString cstr;
 

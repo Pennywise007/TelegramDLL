@@ -32,7 +32,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -40,7 +40,7 @@
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -95,7 +95,8 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;CPPDLL_EXPORTS;WIN32;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(CommonHeadersDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(CommonHeadersDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include;$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,7 +124,10 @@ echo copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetNa
 copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
 
 echo copy "$(ProjectDir)$(ProjectName).h" "$(MyIncludeDir)$(ProjectName)\$(ProjectName).h"
-copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"</Command>
+copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"
+
+echo copy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot"
+robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot" /E /njh /njs /ndl /nc /ns</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -133,7 +137,8 @@ copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThre
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(CommonHeadersDir);$(ProjectDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(CommonHeadersDir);$(ProjectDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include\tgbot</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -159,7 +164,8 @@ copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThre
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;CPPDLL_EXPORTS;WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(CommonHeadersDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(CommonHeadersDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include\tgbot;$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -189,7 +195,10 @@ echo copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetNa
 copy "$(OutputPath)$(TargetName).lib" "$(MyLibDir)$(ProjectName)\$(TargetName).lib"
 
 echo copy "$(ProjectDir)$(ProjectName).h" "$(MyIncludeDir)$(ProjectName)\$(ProjectName).h"
-copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"</Command>
+copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"
+
+echo copy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot"
+robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot" /E /njh /njs /ndl /nc /ns</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -201,7 +210,8 @@ copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThre
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(CommonHeadersDir);$(ProjectDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(CommonHeadersDir);$(ProjectDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include\tgbot</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -221,135 +231,209 @@ copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThre
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\tgbot\Api.cpp" />
-    <ClCompile Include="include\tgbot\EventHandler.cpp" />
-    <ClCompile Include="include\tgbot\net\BoostHttpOnlySslClient.cpp" />
-    <ClCompile Include="include\tgbot\net\CurlHttpClient.cpp" />
-    <ClCompile Include="include\tgbot\net\HttpParser.cpp" />
-    <ClCompile Include="include\tgbot\net\TgLongPoll.cpp" />
-    <ClCompile Include="include\tgbot\net\Url.cpp" />
-    <ClCompile Include="include\tgbot\TgException.cpp" />
-    <ClCompile Include="include\tgbot\TgTypeParser.cpp" />
-    <ClCompile Include="include\tgbot\tools\FileTools.cpp" />
-    <ClCompile Include="include\tgbot\tools\StringTools.cpp" />
-    <ClCompile Include="include\tgbot\types\InlineQueryResult.cpp" />
-    <ClCompile Include="include\tgbot\types\InputFile.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="tgbot-cpp\src\Api.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\Bot.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\EventHandler.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\net\BoostHttpOnlySslClient.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\net\CurlHttpClient.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\net\HttpParser.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\net\TgLongPoll.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\net\Url.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\TgException.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\TgTypeParser.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\tools\FileTools.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\tools\StringTools.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\InlineQueryResult.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\InputFile.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TelegramDLL.cpp" />
     <ClCompile Include="TelegramThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\TelegramDLL.rc2" />
-    <None Include="TelegramDLL.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\tgbot\Api.h" />
-    <ClInclude Include="include\tgbot\Bot.h" />
-    <ClInclude Include="include\tgbot\EventBroadcaster.h" />
-    <ClInclude Include="include\tgbot\EventHandler.h" />
-    <ClInclude Include="include\tgbot\net\BoostHttpOnlySslClient.h" />
-    <ClInclude Include="include\tgbot\net\CurlHttpClient.h" />
-    <ClInclude Include="include\tgbot\net\HttpClient.h" />
-    <ClInclude Include="include\tgbot\net\HttpParser.h" />
-    <ClInclude Include="include\tgbot\net\HttpReqArg.h" />
-    <ClInclude Include="include\tgbot\net\HttpServer.h" />
-    <ClInclude Include="include\tgbot\net\TgLongPoll.h" />
-    <ClInclude Include="include\tgbot\net\TgWebhookLocalServer.h" />
-    <ClInclude Include="include\tgbot\net\TgWebhookServer.h" />
-    <ClInclude Include="include\tgbot\net\TgWebhookTcpServer.h" />
-    <ClInclude Include="include\tgbot\net\Url.h" />
-    <ClInclude Include="include\tgbot\tgbot.h" />
-    <ClInclude Include="include\tgbot\TgException.h" />
-    <ClInclude Include="include\tgbot\TgTypeParser.h" />
-    <ClInclude Include="include\tgbot\tools\FileTools.h" />
-    <ClInclude Include="include\tgbot\tools\StringTools.h" />
-    <ClInclude Include="include\tgbot\types\Animation.h" />
-    <ClInclude Include="include\tgbot\types\Audio.h" />
-    <ClInclude Include="include\tgbot\types\CallbackGame.h" />
-    <ClInclude Include="include\tgbot\types\CallbackQuery.h" />
-    <ClInclude Include="include\tgbot\types\Chat.h" />
-    <ClInclude Include="include\tgbot\types\ChatMember.h" />
-    <ClInclude Include="include\tgbot\types\ChatPhoto.h" />
-    <ClInclude Include="include\tgbot\types\ChosenInlineResult.h" />
-    <ClInclude Include="include\tgbot\types\Contact.h" />
-    <ClInclude Include="include\tgbot\types\Document.h" />
-    <ClInclude Include="include\tgbot\types\File.h" />
-    <ClInclude Include="include\tgbot\types\ForceReply.h" />
-    <ClInclude Include="include\tgbot\types\Game.h" />
-    <ClInclude Include="include\tgbot\types\GameHighScore.h" />
-    <ClInclude Include="include\tgbot\types\GenericReply.h" />
-    <ClInclude Include="include\tgbot\types\InlineKeyboardButton.h" />
-    <ClInclude Include="include\tgbot\types\InlineKeyboardMarkup.h" />
-    <ClInclude Include="include\tgbot\types\InlineQuery.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResult.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultArticle.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultAudio.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedAudio.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedDocument.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedGif.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedMpeg4Gif.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedPhoto.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedSticker.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedVideo.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultCachedVoice.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultContact.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultDocument.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultGame.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultGif.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultLocation.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultMpeg4Gif.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultPhoto.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultVenue.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultVideo.h" />
-    <ClInclude Include="include\tgbot\types\InlineQueryResultVoice.h" />
-    <ClInclude Include="include\tgbot\types\InputContactMessageContent.h" />
-    <ClInclude Include="include\tgbot\types\InputFile.h" />
-    <ClInclude Include="include\tgbot\types\InputLocationMessageContent.h" />
-    <ClInclude Include="include\tgbot\types\InputMedia.h" />
-    <ClInclude Include="include\tgbot\types\InputMediaAnimation.h" />
-    <ClInclude Include="include\tgbot\types\InputMediaAudio.h" />
-    <ClInclude Include="include\tgbot\types\InputMediaDocument.h" />
-    <ClInclude Include="include\tgbot\types\InputMediaPhoto.h" />
-    <ClInclude Include="include\tgbot\types\InputMediaVideo.h" />
-    <ClInclude Include="include\tgbot\types\InputMessageContent.h" />
-    <ClInclude Include="include\tgbot\types\InputTextMessageContent.h" />
-    <ClInclude Include="include\tgbot\types\InputVenueMessageContent.h" />
-    <ClInclude Include="include\tgbot\types\Invoice.h" />
-    <ClInclude Include="include\tgbot\types\KeyboardButton.h" />
-    <ClInclude Include="include\tgbot\types\LabeledPrice.h" />
-    <ClInclude Include="include\tgbot\types\Location.h" />
-    <ClInclude Include="include\tgbot\types\MaskPosition.h" />
-    <ClInclude Include="include\tgbot\types\Message.h" />
-    <ClInclude Include="include\tgbot\types\MessageEntity.h" />
-    <ClInclude Include="include\tgbot\types\orderinfo.h" />
-    <ClInclude Include="include\tgbot\types\PhotoSize.h" />
-    <ClInclude Include="include\tgbot\types\PreCheckoutQuery.h" />
-    <ClInclude Include="include\tgbot\types\ReplyKeyboardMarkup.h" />
-    <ClInclude Include="include\tgbot\types\ReplyKeyboardRemove.h" />
-    <ClInclude Include="include\tgbot\types\ResponseParameters.h" />
-    <ClInclude Include="include\tgbot\types\ShippingAddress.h" />
-    <ClInclude Include="include\tgbot\types\ShippingOption.h" />
-    <ClInclude Include="include\tgbot\types\ShippingQuery.h" />
-    <ClInclude Include="include\tgbot\types\Sticker.h" />
-    <ClInclude Include="include\tgbot\types\StickerSet.h" />
-    <ClInclude Include="include\tgbot\types\SuccessfulPayment.h" />
-    <ClInclude Include="include\tgbot\types\Update.h" />
-    <ClInclude Include="include\tgbot\types\User.h" />
-    <ClInclude Include="include\tgbot\types\UserProfilePhotos.h" />
-    <ClInclude Include="include\tgbot\types\Venue.h" />
-    <ClInclude Include="include\tgbot\types\Video.h" />
-    <ClInclude Include="include\tgbot\types\VideoNote.h" />
-    <ClInclude Include="include\tgbot\types\Voice.h" />
-    <ClInclude Include="include\tgbot\types\WebhookInfo.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\Api.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\Bot.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\EventBroadcaster.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\EventHandler.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\export.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\BoostHttpOnlySslClient.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\CurlHttpClient.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\HttpClient.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\HttpParser.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\HttpReqArg.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\HttpServer.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\TgLongPoll.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\TgWebhookLocalServer.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\TgWebhookServer.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\TgWebhookTcpServer.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\net\Url.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\tgbot.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\TgException.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\TgTypeParser.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\tools\FileTools.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\tools\StringTools.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Animation.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Audio.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\BotCommand.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\CallbackGame.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\CallbackQuery.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Chat.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ChatMember.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ChatPermissions.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ChatPhoto.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ChosenInlineResult.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Contact.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Document.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\File.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ForceReply.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Game.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\GameHighScore.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\GenericReply.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineKeyboardButton.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineKeyboardMarkup.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQuery.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResult.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultArticle.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultAudio.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedAudio.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedDocument.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedGif.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedMpeg4Gif.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedPhoto.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedSticker.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedVideo.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultCachedVoice.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultContact.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultDocument.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultGame.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultGif.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultLocation.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultMpeg4Gif.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultPhoto.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultVenue.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultVideo.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InlineQueryResultVoice.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputContactMessageContent.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputFile.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputLocationMessageContent.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMedia.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMediaAnimation.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMediaAudio.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMediaDocument.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMediaPhoto.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMediaVideo.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputMessageContent.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputTextMessageContent.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\InputVenueMessageContent.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Invoice.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\KeyboardButton.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\LabeledPrice.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Location.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\LoginUrl.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\MaskPosition.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Message.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\MessageEntity.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\OrderInfo.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\PhotoSize.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Poll.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\PollOption.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\PreCheckoutQuery.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ReplyKeyboardMarkup.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ReplyKeyboardRemove.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ResponseParameters.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ShippingAddress.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ShippingOption.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\ShippingQuery.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Sticker.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\StickerSet.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\SuccessfulPayment.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Update.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\User.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\UserProfilePhotos.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Venue.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Video.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\VideoNote.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\Voice.h" />
+    <ClInclude Include="tgbot-cpp\include\tgbot\types\WebhookInfo.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="TelegramDLL.h" />
     <ClInclude Include="TelegramThread.h" />
   </ItemGroup>
   <ItemGroup>
