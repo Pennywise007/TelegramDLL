@@ -95,7 +95,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;CPPDLL_EXPORTS;WIN32;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(CommonHeadersDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include;$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,15 +115,12 @@
     <PostBuildEvent>
       <Command>echo copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
 
-copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
+
+xcopy /C /q /y /i "$(ProjectDir)TelegramThread.h" "$(OutDir)include\"
+
 
 echo copy "$(ProjectDir)tgbot" "$(OutDir)include\tgbot"
-
-echo copy "$(ProjectDir)$(ProjectName).h" "$(MyIncludeDir)$(ProjectName)\$(ProjectName).h"
-copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"
-
-echo copy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot"
-robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot" /E /njh /njs /ndl /nc /ns</Command>
+xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(OutDir)include\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -133,7 +130,7 @@ robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\t
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(CommonHeadersDir);$(ProjectDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include\tgbot</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,11 +149,12 @@ robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\t
     <PostBuildEvent>
       <Command>echo copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
 
-copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
+
+xcopy /C /q /y /i "$(ProjectDir)TelegramThread.h" "$(OutDir)include\"
+
 
 echo copy "$(ProjectDir)tgbot" "$(OutDir)include\tgbot"
-
-xcopy /C /q /s /y /i  "$(ProjectDir)include" "$(OutDir)include\"</Command>
+xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(OutDir)include\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -168,7 +166,7 @@ xcopy /C /q /s /y /i  "$(ProjectDir)include" "$(OutDir)include\"</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;CPPDLL_EXPORTS;WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(CommonHeadersDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include\tgbot;$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,15 +188,12 @@ xcopy /C /q /s /y /i  "$(ProjectDir)include" "$(OutDir)include\"</Command>
     <PostBuildEvent>
       <Command>echo copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
 
-copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
+
+xcopy /C /q /y /i "$(ProjectDir)TelegramThread.h" "$(OutDir)include\"
+
 
 echo copy "$(ProjectDir)tgbot" "$(OutDir)include\tgbot"
-
-echo copy "$(ProjectDir)$(ProjectName).h" "$(MyIncludeDir)$(ProjectName)\$(ProjectName).h"
-copy "$(ProjectDir)TelegramThread.h" "$(MyIncludeDir)$(ProjectName)\TelegramThread.h"
-
-echo copy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot"
-robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\tgbot" /E /njh /njs /ndl /nc /ns</Command>
+xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(OutDir)include\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -210,7 +205,7 @@ robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\t
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(CommonHeadersDir);$(ProjectDir);$(BoostIncludeDir);$(OpenSSLIncludeDir);$(MyIncludeDir);$(CurlIncludeDir);$(ProjectDir)/include/tgbot-cpp/include\tgbot</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
@@ -232,11 +227,12 @@ robocopy "$(ProjectDir)tgbot-cpp\include\tgbot" "$(MyIncludeDir)$(ProjectName)\t
     <PostBuildEvent>
       <Command>echo copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
 
-copy "$(ProjectDir)TelegramThread.h" "$(OutDir)include\TelegramThread.h"
+
+xcopy /C /q /y /i "$(ProjectDir)TelegramThread.h" "$(OutDir)include\"
+
 
 echo copy "$(ProjectDir)tgbot" "$(OutDir)include\tgbot"
-
-xcopy /C /q /s /y /i  "$(ProjectDir)include" "$(OutDir)include\"</Command>
+xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(OutDir)include\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
