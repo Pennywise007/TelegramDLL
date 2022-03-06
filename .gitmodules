@@ -1,0 +1,6 @@
+[submodule "TelegramDLL/include/tgbot-cpp"]
+	path = TelegramDLL/include/tgbot-cpp
+	url = https://github.com/reo7sp/tgbot-cpp/
+[submodule "TelegramDLL/tgbot-cpp"]
+	path = TelegramDLL/tgbot-cpp
+	url = https://github.com/reo7sp/tgbot-cpp

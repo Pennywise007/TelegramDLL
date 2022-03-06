@@ -15,6 +15,7 @@
     #define DLLIMPORT_EXPORT __declspec(dllimport)
 #endif
 
+#include <combaseapi.h>
 #include <memory>
 #include <string>
 #include <functional>
