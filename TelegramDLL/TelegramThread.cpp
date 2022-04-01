@@ -1,17 +1,18 @@
 /*
-    Описание Api - https://core.telegram.org/bots/api
-    токен = token
-    Идентификатор чата - id
-    Текст - UTF-8
+   Api description - https://core.telegram.org/bots/api
+   token = token
+   Chat ID - id
+   Text - UTF-8
 
-    Отправить сообщение https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text=test
-    Проверить обновления https://api.telegram.org/bot{token}/getUpdates
+   Send message https://api.telegram.org/bot{token}/SendMessage?chat_id={chat_id}&text=test
+   Check for updates https://api.telegram.org/bot{token}/getUpdates
 */
 
 #include "stdafx.h"
 
 #include <ext/trace/tracer.h>
-#include <ext/utils/string.h>
+#include <ext/std/string.h>
+#include <ext/core/check.h>
 
 #include <atlconv.h>
 #include <string>
@@ -20,79 +21,77 @@
 
 #include "TelegramThread.h"
 
-#include <tgbot/tgbot.h>
-
 using namespace TgBot;
 
-// структура с данными для работы потока
+// data structure for the thread to work
 struct WorkTelegramData
 {
-    // флаг работы потока
+    // thread flag
     std::atomic_bool bThreadWorkFlag = false;
 
-    // бот
+    // bot
     Bot bot;
 
 #ifdef HAVE_CURL
-    // клиент
-    CurlHttpClient curlHttpClient;
+    // customer
+    curlHttpClient curlHttpClient;
 #endif //HAVE_CURL
 
-    // колбэк на получение ошибки
+    // callback to receive an error
     TelegramErrorHandler errorHandler;
 
-    // конструктор
+    // constructor
     explicit WorkTelegramData(const std::string& token, TelegramErrorHandler errorHandlerFunction)
         : bot(token
 #ifdef HAVE_CURL
               , curlHttpClient
 #endif // HAVE_CURL
-              )
+        )
         , errorHandler(std::move(errorHandlerFunction))
     {}
 };
 
-// чтобы не торчать наружу внутрянкой бота мы делаем вспомогательный класс
+// in order not to stick out the inside of the bot, we make an auxiliary class
 class TelegramThread : public ITelegramThread
 {
 public:
-    // token - токен бота
+    // token - bot token
     explicit TelegramThread(const std::string& token, const TelegramErrorHandler& errorHandler = nullptr);
 
     ~TelegramThread();
 
 // ITelegramThread
 public:
-    // запуск потока
-    void startTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
+    // start thread
+    void StartTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
                              const CommandFunction& onUnknownCommand = nullptr,
-                             const CommandFunction& onNonCommandMessage = nullptr) override;
-    // остановка потока
-    void stopTelegramThread() override;
+                             const CommandFunction& OnNonCommandMessage = nullptr) override;
+    // stop thread
+    void StopTelegramThread() override;
 
-    // функция отправки сообщений в чаты
-    void sendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
+    // function for sending messages to chats
+    void SendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                      GenericReply::Ptr replyMarkup = std::make_shared<GenericReply>(), const std::string& parseMode = "", bool disableNotification = false) override;
 
-    // функция отправки сообщения в чат
-    void sendMessage(int64_t chatId, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
+    // function to send a message to the chat
+    void SendMessage(int64_t chatId, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                      GenericReply::Ptr replyMarkup = std::make_shared<GenericReply>(), const std::string& parseMode = "", bool disableNotification = false) override;
 
-    // возвращает события бота чтобы самому все обрабатывать
-    TgBot::EventBroadcaster& getBotEvents() override;
+    // returns bot events to handle everything itself
+    TgBot::EventBroadcaster& GetBotEvents() override;
 
-    // получение апи бота
-    const TgBot::Api& getBotApi() override;
+    // get api bot
+    const TgBot::Api& GetBotApi() override;
 public:
-    // рабочий поток бота телеграма
+    // telegram bot workflow
     std::thread m_telegramThread;
 
-    // данные необходимые для работы телеграма
+    // data required for the telegram to work
     WorkTelegramData m_telegramWorkData;
 };
 
 //----------------------------------------------------------------------------//
-// отправка оповещения об ошибке родителю
+// send an error notification to the parent
 void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...);
 void sendAlert(const TelegramErrorHandler& errorHandler, const std::wstring& str);
 
@@ -113,15 +112,15 @@ TelegramThread::TelegramThread(const std::string& token,
 //----------------------------------------------------------------------------//
 TelegramThread::~TelegramThread()
 {
-    stopTelegramThread();
+    StopTelegramThread();
 
     if (m_telegramThread.joinable())
         m_telegramThread.join();
 }
 
-// рабочий поток
-// commandsList - перечень команд и исполняемых функций
-// onAnyMessageCommand - код выполняемый при получении любого сообщения
+// worker thread
+// commandsList - list of commands and executable functions
+// onAnyMessageCommand - code to be executed when any message is received
 UINT telegramWorkThread(WorkTelegramData* telegramData)
 {
     try
@@ -157,35 +156,35 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::startTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
+void TelegramThread::StartTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
                                          const CommandFunction& onUnknownCommand /*= nullptr*/,
-                                         const CommandFunction& onNonCommandMessage /*= nullptr*/)
+                                         const CommandFunction& OnNonCommandMessage /*= nullptr*/)
 {
     for (auto&& [command, function] : commandsList)
         m_telegramWorkData.bot.getEvents().onCommand(command, function);
     m_telegramWorkData.bot.getEvents().onUnknownCommand(onUnknownCommand);
-    m_telegramWorkData.bot.getEvents().onNonCommandMessage(onNonCommandMessage);
+    m_telegramWorkData.bot.getEvents().onNonCommandMessage(OnNonCommandMessage);
 
     m_telegramWorkData.bThreadWorkFlag = true;
 
-    assert(!m_telegramThread.joinable() && "Поток телеграма уже запущен!");
+    EXT_ASSERT(!m_telegramThread.joinable() && "Поток телеграма уже запущен!");
     m_telegramThread.swap(std::thread(&telegramWorkThread, &m_telegramWorkData));
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::stopTelegramThread()
+void TelegramThread::StopTelegramThread()
 {
     m_telegramWorkData.bThreadWorkFlag = false;
     m_telegramWorkData.errorHandler = nullptr;
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::sendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg,
+void TelegramThread::SendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg,
                                  bool disableWebPagePreview, int32_t replyToMessageId,
                                  GenericReply::Ptr replyMarkup, const std::string& parseMode,
                                  bool disableNotification)
 {
-    // отправляем сообщение всем пользователям
+    // send message to all users
     for (auto& chatId : chatIds)
     {
         try
@@ -196,33 +195,33 @@ void TelegramThread::sendMessage(const std::list<int64_t>& chatIds, const std::w
         }
         catch (std::exception& e)
         {
-            OutputDebugStringA(std::string_sprintf("Error sendMessage: %s\n", e.what()).c_str());
+            OutputDebugStringA(std::string_sprintf("Error SendMessage: %s\n", e.what()).c_str());
             sendAlert(m_telegramWorkData.errorHandler, "Ошибка отправки сообщения: %s\n", e.what());
         }
     }
 }
 
 //----------------------------------------------------------------------------//
-void TelegramThread::sendMessage(int64_t chatId, const std::wstring& msg,
+void TelegramThread::SendMessage(int64_t chatId, const std::wstring& msg,
                                  bool disableWebPagePreview, int32_t replyToMessageId,
                                  GenericReply::Ptr replyMarkup, const std::string& parseMode,
                                  bool disableNotification)
 {
     std::list<int64_t> chatIds;
     chatIds.push_back(chatId);
-    sendMessage(chatIds, msg, disableWebPagePreview,
+    SendMessage(chatIds, msg, disableWebPagePreview,
                 replyToMessageId, replyMarkup,
                 parseMode, disableNotification);
 }
 
 //----------------------------------------------------------------------------//
-TgBot::EventBroadcaster& TelegramThread::getBotEvents()
+TgBot::EventBroadcaster& TelegramThread::GetBotEvents()
 {
     return m_telegramWorkData.bot.getEvents();
 }
 
 //----------------------------------------------------------------------------//
-const TgBot::Api& TelegramThread::getBotApi()
+const TgBot::Api& TelegramThread::GetBotApi()
 {
     return m_telegramWorkData.bot.getApi();
 }
@@ -305,7 +304,7 @@ inline DLLIMPORT_EXPORT std::wstring getUNICODEString(const std::string& utf8Str
         return false;
     }
 
-    assert(newLen < utf8StrLen);
+    EXT_ASSERT(newLen < utf8StrLen);
     newLen = WideCharToMultiByte(
         CP_ACP, 0,
         buf, newLen, ptr, utf8StrLen
@@ -356,7 +355,7 @@ inline DLLIMPORT_EXPORT void HandleTgUpdate(const TgBot::EventHandler& handler,
 }
 
 /*
-// отправка запроса через CURL
+// CURL
 #include "curl/curl.h"
 size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -376,7 +375,7 @@ void sendRequestByCurl()
 
         std::string readBuffer;
         curl_easy_setopt(curl, CURLOPT_URL,
-                         "https://api.telegram.org/bot{token}/sendMessage");
+                         "https://api.telegram.org/bot{token}/SendMessage");
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
