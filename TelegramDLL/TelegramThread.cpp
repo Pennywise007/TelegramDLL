@@ -13,6 +13,7 @@
 #include <ext/trace/tracer.h>
 #include <ext/std/string.h>
 #include <ext/core/check.h>
+#include <ext/core.h>
 
 #include <atlconv.h>
 #include <string>
@@ -100,13 +101,10 @@ TelegramThread::TelegramThread(const std::string& token,
                                const TelegramErrorHandler& errorHandler /*= nullptr*/)
     : m_telegramWorkData(token, errorHandler)
 {
-    struct thousands_separator : std::numpunct<char>
-    {
-        char_type do_thousands_sep() const override { return '\0'; }
-    };
-
     // Removing thousands separator from locale, awoid boost::lexical_cast wrong conversion
-    std::locale::global(std::locale(std::ostringstream().getloc(), new thousands_separator()));
+    const std::locale baseLoc = std::locale("");
+    const auto localeWithFixedSeparators = std::locale(std::locale(baseLoc, new ext::core::numbers_formatter<wchar_t>()), new ext::core::numbers_formatter<char>());
+    std::locale::global(localeWithFixedSeparators);
 }
 
 //----------------------------------------------------------------------------//
