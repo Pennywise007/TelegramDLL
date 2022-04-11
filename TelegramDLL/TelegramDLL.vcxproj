@@ -133,6 +133,7 @@ xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(SolutionDir)include\"<
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,6 +171,7 @@ xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(SolutionDir)include\"<
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;CPPDLL_EXPORTS;WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -211,6 +213,7 @@ xcopy /C /q /s /y /i  "$(ProjectDir)tgbot-cpp\include" "$(SolutionDir)include\"<
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>D:\Program Files (x86)\Visual Leak Detector\include;$(ProjectDir);$(OpenSSLIncludeDir);$(CurlIncludeDir);$(ProjectDir)tgbot-cpp\include\</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
