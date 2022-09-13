@@ -326,9 +326,9 @@ inline DLLIMPORT_EXPORT ITelegramThreadPtr CreateTelegramThread(const std::strin
                                                                 ITelegramAlerter* alertInterface /*= nullptr*/)
 {
     if (alertInterface)
-        return std::make_unique<TelegramThread>(token, std::bind(&ITelegramAlerter::onAlertFromTelegram, alertInterface, std::placeholders::_1));
+        return std::make_shared<TelegramThread>(token, std::bind(&ITelegramAlerter::onAlertFromTelegram, alertInterface, std::placeholders::_1));
     else
-        return std::make_unique<TelegramThread>(token);
+        return std::make_shared<TelegramThread>(token);
 }
 
 //----------------------------------------------------------------------------//

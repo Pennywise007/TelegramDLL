@@ -78,7 +78,7 @@ struct DLLIMPORT_EXPORT ITelegramThread
     // get api bot
     virtual const TgBot::Api& GetBotApi() = 0;
 };
-typedef std::unique_ptr<ITelegramThread> ITelegramThreadPtr;
+typedef std::shared_ptr<ITelegramThread> ITelegramThreadPtr;
 
 // create an instance of our class
 inline DLLIMPORT_EXPORT
