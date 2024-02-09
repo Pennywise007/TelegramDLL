@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#include <ext/trace/tracer.h>
+#include <ext/core/tracer.h>
 #include <ext/std/string.h>
 #include <ext/core/check.h>
 #include <ext/core.h>
