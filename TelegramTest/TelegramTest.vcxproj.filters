@@ -13,18 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="tgbot">
-      <UniqueIdentifier>{dccea085-66ef-4ff5-86f7-adb145a08508}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="tgbot\net">
-      <UniqueIdentifier>{5976fc57-83e2-40a2-8293-34bbd57fd147}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="tgbot\tools">
-      <UniqueIdentifier>{0069d39c-38bc-4394-8d95-28421ab9cb78}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="tgbot\types">
-      <UniqueIdentifier>{b9c5f47b-9b8c-4322-bc4c-00831c33c5cd}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TelegramTest.cpp">
@@ -32,5 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

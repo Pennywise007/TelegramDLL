@@ -78,6 +78,24 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\ChatMember.cpp">
+      <Filter>tgBot\types</Filter>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\InputMedia.cpp">
+      <Filter>tgBot\types</Filter>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\InputMessageContent.cpp">
+      <Filter>tgBot\types</Filter>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\MenuButton.cpp">
+      <Filter>tgBot\types</Filter>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\PassportElementError.cpp">
+      <Filter>tgBot\types</Filter>
+    </ClCompile>
+    <ClCompile Include="tgbot-cpp\src\types\BotCommandScope.cpp">
+      <Filter>tgBot\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\TelegramDLL.rc2">

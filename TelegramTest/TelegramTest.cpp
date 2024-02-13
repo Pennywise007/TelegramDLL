@@ -4,7 +4,7 @@
 #include <mutex>
 #include <csignal>
 
-#include <TelegramDLL/TelegramThread.h>
+#include <TelegramThread.h>
 
 std::condition_variable gInterruptWork;
 
@@ -44,21 +44,25 @@ void WaitForExecution()
     std::cout << "Завершено успешно" << std::endl;
 }
 
-std::unordered_map<std::string, CommandFunction> FillCommands(ITelegramThread* pTelegramThread)
+std::list<ITelegramThread::CommandInfo> FillCommands(ITelegramThread* pTelegramThread)
 {
-    std::unordered_map<std::string, CommandFunction> commandsList;
-    commandsList.try_emplace("Comand1", [pTelegramThread](const TgBot::Message::Ptr message)
+    std::list<ITelegramThread::CommandInfo> commandsList;
+    auto& obj = commandsList.emplace_back(ITelegramThread::CommandInfo{
+        L"comand_1", L"Command1 description", [pTelegramThread](const TgBot::Message::Ptr message)
     {
         std::cout << "Получена команда Comand1" << std::endl;
-        pTelegramThread->sendMessage(message->chat->id, L"Получена команда1");
-    });
+        pTelegramThread->SendMessage(message->chat->id, L"Получена команда1");
+    }});
 
     return commandsList;
 }
 
-void AddKeyboardWithCallbacks(ITelegramThread* pTelegramThread, std::unordered_map<std::string, CommandFunction>& commandsList)
+void AddKeyboardWithCallbacks(ITelegramThread* pTelegramThread, std::list<ITelegramThread::CommandInfo>& commandsList)
 {
-    commandsList.try_emplace("InlineKeyboard", [pTelegramThread](const TgBot::Message::Ptr message)
+    commandsList.emplace_back(ITelegramThread::CommandInfo{
+        L"inline_keyboard",
+        L"InlineKeyboard description",
+        [pTelegramThread](const TgBot::Message::Ptr message)
     {
          std::cout << "Получена команда InlineKeyboard" << std::endl;
 
@@ -74,10 +78,13 @@ void AddKeyboardWithCallbacks(ITelegramThread* pTelegramThread, std::unordered_m
          TgBot::InlineKeyboardMarkup::Ptr keyboard = std::make_shared<TgBot::InlineKeyboardMarkup>();
          keyboard->inlineKeyboard.push_back({button1, button2});
 
-         pTelegramThread->sendMessage(message->chat->id, L"Получена InlineKeyboard", false, false, keyboard);
-    });
+         pTelegramThread->SendMessage(message->chat->id, L"Получена InlineKeyboard", false, false, keyboard);
+    }});
 
-    commandsList.try_emplace("ReplyKeyboard", [pTelegramThread](const TgBot::Message::Ptr message)
+    commandsList.emplace_back(ITelegramThread::CommandInfo{
+        L"reply_keyboard",
+        L"ReplyKeyboard description",
+        [pTelegramThread](const TgBot::Message::Ptr message)
     {
          std::cout << "Получена команда ReplyKeyboard" << std::endl;
 
@@ -94,42 +101,45 @@ void AddKeyboardWithCallbacks(ITelegramThread* pTelegramThread, std::unordered_m
          keyboard->keyboard.push_back({button1, button2});
          keyboard->resizeKeyboard = true;
 
-         pTelegramThread->sendMessage(message->chat->id, L"Получена ReplyKeyboard", false, false, keyboard);
-    });
+         pTelegramThread->SendMessage(message->chat->id, L"Получена ReplyKeyboard", false, false, keyboard);
+    } });
 
-    commandsList.try_emplace("RemoveKeyBoard", [pTelegramThread](const TgBot::Message::Ptr message)
+    commandsList.emplace_back(ITelegramThread::CommandInfo{
+        L"remove_keyboard",
+        L"RemoveKeyBoard description",
+        [pTelegramThread](const TgBot::Message::Ptr message)
     {
          std::cout << "Получена команда RemoveKeyBoard" << std::endl;
 
-         pTelegramThread->sendMessage(message->chat->id, L"Получена RemoveKeyBoard", false, false, std::make_shared<TgBot::ReplyKeyboardRemove>());
-    });
+         pTelegramThread->SendMessage(message->chat->id, L"Получена RemoveKeyBoard", false, false, std::make_shared<TgBot::ReplyKeyboardRemove>());
+    } });
 
-    pTelegramThread->getBotEvents().onInlineQuery([pTelegramThread](const TgBot::InlineQuery::Ptr query)
+    pTelegramThread->GetBotEvents().onInlineQuery([pTelegramThread](const TgBot::InlineQuery::Ptr query)
     {
         const std::wstring text = L"onInlineQuery: " + getUNICODEString(query->query);
 
         std::wcout << text << std::endl;
 
-        pTelegramThread->sendMessage(query->from->id, text);
+        pTelegramThread->SendMessage(query->from->id, text);
     });
 
-    pTelegramThread->getBotEvents().onCallbackQuery([pTelegramThread](const TgBot::CallbackQuery::Ptr query)
+    pTelegramThread->GetBotEvents().onCallbackQuery([pTelegramThread](const TgBot::CallbackQuery::Ptr query)
     {
         std::wstring text = L"Нажата кнопка из: " + getUNICODEString(query->message->text) + L"\n";
         text += L"С колбэком: " + getUNICODEString(query->data);
 
         std::wcout << text << std::endl;
 
-        pTelegramThread->sendMessage(query->message->chat->id, text);
+        pTelegramThread->SendMessage(query->message->chat->id, text);
     });
 
-    pTelegramThread->getBotEvents().onChosenInlineResult([pTelegramThread](const TgBot::ChosenInlineResult::Ptr result)
+    pTelegramThread->GetBotEvents().onChosenInlineResult([pTelegramThread](const TgBot::ChosenInlineResult::Ptr result)
     {
         const std::wstring text = L"onChosenInlineResult: " + getUNICODEString(result->query);
 
         std::wcout << text << std::endl;
 
-        pTelegramThread->sendMessage(result->from->id, text);
+        pTelegramThread->SendMessage(result->from->id, text);
     });
 }
 
@@ -155,35 +165,29 @@ int main()
 
     AddKeyboardWithCallbacks(pTelegramThread.get(), commands);
 
-    auto getCommandsList = [](const decltype(commands)& commandsList)
-    {
-        std::string allCommandsText("Список команд:\n");
-        for (auto&& [commandText, function] : commandsList)
-        {
-            allCommandsText += "/" + commandText + "\n";
-        }
-        return std::wstring(CA2W(allCommandsText.c_str()));
-    };
-
-    const CommandFunction onUnknownCommand = [&](const TgBot::Message::Ptr message)
+    const CommandCallback onUnknownCommand = [&](const TgBot::Message::Ptr message)
     {
         std::wcout << L"Получена неизвестная команда и отправлена назад:\n" << getUNICODEString(message->text) << std::endl;
 
-        pTelegramThread->sendMessage(message->chat->id, L"Получено сообщение: " + getUNICODEString(message->text) + L"\n" + getCommandsList(commands));
-
+        pTelegramThread->SendMessage(message->chat->id, L"Получена неизвестная команда: " + getUNICODEString(message->text));
     };
-    const CommandFunction onNonCommandMessage = [&](const TgBot::Message::Ptr message)
+    const CommandCallback onNonCommandMessage = [&](const TgBot::Message::Ptr message)
     {
         std::wcout << L"Получено неизвестное сообщение и отправлено назад:\n" << getUNICODEString(message->text) << std::endl;
-        pTelegramThread->sendMessage(message->chat->id, L"Получено сообщение: " + getUNICODEString(message->text) + L"\n" + getCommandsList(commands));
-
+        pTelegramThread->SendMessage(message->chat->id, L"Получено неизвестное сообщениe: " + getUNICODEString(message->text));
     };
 
-    pTelegramThread->startTelegramThread(commands, onUnknownCommand, onNonCommandMessage);
+    try
+    {
+        pTelegramThread->StartTelegramThread(commands, onUnknownCommand, onNonCommandMessage);
 
-    //std::cout << "Запущен бот " << pTelegramThread->getBotApi().getMe()->firstName << std::endl;
-
-    WaitForExecution();
+        WaitForExecution();
+    }
+    catch (std::exception& exception)
+    {
+        std::cout << "Не обработанное исключение: " << exception.what();
+        return -1;
+    }
 
     return 0;
 }

@@ -19,7 +19,6 @@
 #include <string>
 #include <functional>
 #include <list>
-#include <unordered_map>
 
 #pragma warning( push )
 #pragma warning( disable: 4996 ) // boost deprecated objects usage
@@ -43,7 +42,7 @@ struct DLLIMPORT_EXPORT ITelegramAlerter
 
 typedef std::function<void(const std::wstring&)> TelegramErrorHandler;
 typedef TgBot::Message::Ptr MessagePtr;
-typedef TgBot::EventBroadcaster::MessageListener CommandFunction;
+typedef TgBot::EventBroadcaster::MessageListener CommandCallback;
 
 //----------------------------------------------------------------------------//
 struct DLLIMPORT_EXPORT ITelegramThread
@@ -52,21 +51,34 @@ struct DLLIMPORT_EXPORT ITelegramThread
     // longpoll requests, TODO to convert to your own BoostHttpOnlySslClient
     virtual ~ITelegramThread() = default;
 
-    // start thread
-    virtual void StartTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
-                                     const CommandFunction& onUnknownCommand = nullptr,
-                                     const CommandFunction& OnNonCommandMessage = nullptr) = 0;
+    // https://core.telegram.org/bots/api#botcommand
+    struct CommandInfo
+    {
+        // Text of the command; 1-32 characters. Can contain only lowercase English letters, digits and underscores.
+        std::wstring command;
+        // Description of the command; 1-256 characters.
+        std::wstring description;
+        // Callback for the command
+        CommandCallback callback;
+    };
+    // start thread and set callbacks
+    // will throw exception on API call error
+    virtual void StartTelegramThread(const std::list<CommandInfo>& commandsList,
+                                     const CommandCallback& onUnknownCommand = nullptr,
+                                     const CommandCallback& OnNonCommandMessage = nullptr) = 0;
 
     // stop thread
     virtual void StopTelegramThread() = 0;
 
-    // function for sending messages to chats
+    // Get current bot commands
+    virtual std::list<std::pair<std::wstring, std::wstring>> GetCommands() const = 0;
+
+    // send message to chats
     virtual void SendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg,
                              bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                              TgBot::GenericReply::Ptr replyMarkup = std::make_shared<TgBot::GenericReply>(),
                              const std::string& parseMode = "", bool disableNotification = false) = 0;
 
-    // function to send a message to the chat
     virtual void SendMessage(int64_t chatId, const std::wstring& msg, bool disableWebPagePreview = false,
                              int32_t replyToMessageId = 0,
                              TgBot::GenericReply::Ptr replyMarkup = std::make_shared<TgBot::GenericReply>(),

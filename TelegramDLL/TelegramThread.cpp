@@ -18,7 +18,7 @@
 #include <atlconv.h>
 #include <string>
 #include <thread>
-#include <unordered_map>
+#include <regex>
 
 #include "TelegramThread.h"
 
@@ -64,17 +64,20 @@ public:
 // ITelegramThread
 public:
     // start thread
-    void StartTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
-                             const CommandFunction& onUnknownCommand = nullptr,
-                             const CommandFunction& OnNonCommandMessage = nullptr) override;
+    void StartTelegramThread(const std::list<CommandInfo>& commandsList,
+                             const CommandCallback& onUnknownCommand = nullptr,
+                             const CommandCallback& OnNonCommandMessage = nullptr) override;
     // stop thread
     void StopTelegramThread() override;
 
-    // function for sending messages to chats
+    // Get current bot commands
+    std::list<std::pair<std::wstring, std::wstring>> GetCommands() const override;
+
+    // send message to chats
     void SendMessage(const std::list<int64_t>& chatIds, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                      GenericReply::Ptr replyMarkup = std::make_shared<GenericReply>(), const std::string& parseMode = "", bool disableNotification = false) override;
 
-    // function to send a message to the chat
+    // send a message to the chat
     void SendMessage(int64_t chatId, const std::wstring& msg, bool disableWebPagePreview = false, int32_t replyToMessageId = 0,
                      GenericReply::Ptr replyMarkup = std::make_shared<GenericReply>(), const std::string& parseMode = "", bool disableNotification = false) override;
 
@@ -153,13 +156,41 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
     return 0;
 }
 
+// Check that command: 1-32 characters. Can contain only lowercase English letters, digits and underscores.
+bool isValidCommand(const std::string& command) {
+    static const std::regex pattern("^[a-z0-9_]{1,32}$");
+    return std::regex_match(command, pattern);
+}
+
 //----------------------------------------------------------------------------//
-void TelegramThread::StartTelegramThread(const std::unordered_map<std::string, CommandFunction>& commandsList,
-                                         const CommandFunction& onUnknownCommand /*= nullptr*/,
-                                         const CommandFunction& OnNonCommandMessage /*= nullptr*/)
+void TelegramThread::StartTelegramThread(const std::list<CommandInfo>& commandsList,
+                                         const CommandCallback& onUnknownCommand /*= nullptr*/,
+                                         const CommandCallback& OnNonCommandMessage /*= nullptr*/)
 {
-    for (auto&& [command, function] : commandsList)
-        m_telegramWorkData.bot.getEvents().onCommand(command, function);
+    m_telegramWorkData.bot.getApi().deleteMyCommands();
+    if (!commandsList.empty())
+    {
+        std::vector<TgBot::BotCommand::Ptr> commands;
+        commands.reserve(commandsList.size());
+
+        for (auto&& command : commandsList)
+        {
+            auto botCommand = std::make_shared<TgBot::BotCommand>();
+            botCommand->command = getUtf8Str(command.command);
+            if (!isValidCommand(botCommand->command))
+            {
+                throw std::invalid_argument(
+                    std::string_sprintf("Command '%s' doesn't follow the rule: 1-32 characters. Can contain only lowercase English letters, digits and underscores.", command.command));
+            }
+            botCommand->description = getUtf8Str(command.description);
+
+            m_telegramWorkData.bot.getEvents().onCommand(botCommand->command, command.callback);
+            commands.emplace_back(std::move(botCommand));
+        }
+
+        m_telegramWorkData.bot.getApi().setMyCommands(commands);
+    }
+
     m_telegramWorkData.bot.getEvents().onUnknownCommand(onUnknownCommand);
     m_telegramWorkData.bot.getEvents().onNonCommandMessage(OnNonCommandMessage);
 
@@ -167,6 +198,19 @@ void TelegramThread::StartTelegramThread(const std::unordered_map<std::string, C
 
     EXT_ASSERT(!m_telegramThread.joinable() && "Поток телеграма уже запущен!");
     m_telegramThread.swap(std::thread(&telegramWorkThread, &m_telegramWorkData));
+}
+
+//----------------------------------------------------------------------------//
+std::list<std::pair<std::wstring, std::wstring>> TelegramThread::GetCommands() const
+{
+    std::vector<BotCommand::Ptr> commands = m_telegramWorkData.bot.getApi().getMyCommands();
+
+    std::list<std::pair<std::wstring, std::wstring>> res;
+    for (auto& command : commands)
+    {
+        res.emplace_back(std::make_pair(getUNICODEString(command->command), getUNICODEString(command->description)));
+    }
+    return res;
 }
 
 //----------------------------------------------------------------------------//
