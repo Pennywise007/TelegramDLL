@@ -12,6 +12,7 @@
 
 #include <ext/core/tracer.h>
 #include <ext/std/string.h>
+#include <ext/thread/thread.h>
 #include <ext/core/check.h>
 #include <ext/core.h>
 
@@ -27,9 +28,6 @@ using namespace TgBot;
 // data structure for the thread to work
 struct WorkTelegramData
 {
-    // thread flag
-    std::atomic_bool bThreadWorkFlag = false;
-
     // bot
     Bot bot;
 
@@ -61,7 +59,7 @@ public:
 
     ~TelegramThread();
 
-// ITelegramThread
+    // ITelegramThread
 public:
     // start thread
     void StartTelegramThread(const std::list<CommandInfo>& commandsList,
@@ -88,7 +86,7 @@ public:
     const TgBot::Api& GetBotApi() override;
 public:
     // telegram bot workflow
-    std::thread m_telegramThread;
+    ext::thread m_telegramThread;
 
     // data required for the telegram to work
     WorkTelegramData m_telegramWorkData;
@@ -96,7 +94,7 @@ public:
 
 //----------------------------------------------------------------------------//
 // send an error notification to the parent
-void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...);
+void sendAlert(const TelegramErrorHandler& errorHandler, const char* format, ...);
 void sendAlert(const TelegramErrorHandler& errorHandler, const std::wstring& str);
 
 //----------------------------------------------------------------------------//
@@ -114,9 +112,6 @@ TelegramThread::TelegramThread(const std::string& token,
 TelegramThread::~TelegramThread()
 {
     StopTelegramThread();
-
-    if (m_telegramThread.joinable())
-        m_telegramThread.join();
 }
 
 // worker thread
@@ -131,11 +126,11 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
     }
     catch (std::exception& e)
     {
-        sendAlert(telegramData->errorHandler, "Ошибка инициализации бота, описание ошибки: %s\n", e.what());
+        sendAlert(telegramData->errorHandler, "Failed to init bot: %s\n", e.what());
     }
 
     TgLongPoll longPoll(telegramData->bot);
-    while (telegramData->bThreadWorkFlag)
+    while (!ext::this_thread::interruption_requested())
     {
         try
         {
@@ -144,12 +139,17 @@ UINT telegramWorkThread(WorkTelegramData* telegramData)
         }
         catch (std::exception& e)
         {
-            if (telegramData->bThreadWorkFlag)
-                break;
-
             OutputDebugStringA(std::string_sprintf("error: %s\n", e.what()).c_str());
-            sendAlert(telegramData->errorHandler, "Ошибка в работе бота: %s\n", e.what());
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            sendAlert(telegramData->errorHandler, "Failure in bot long poll: %s\n", e.what());
+
+            try
+            {
+                ext::this_thread::interruptible_sleep_for(std::chrono::seconds(5));
+            }
+            catch (...)
+            {
+                break;
+            }
         }
     }
 
@@ -167,7 +167,14 @@ void TelegramThread::StartTelegramThread(const std::list<CommandInfo>& commandsL
                                          const CommandCallback& onUnknownCommand /*= nullptr*/,
                                          const CommandCallback& OnNonCommandMessage /*= nullptr*/)
 {
-    m_telegramWorkData.bot.getApi().deleteMyCommands();
+    try
+    {
+        m_telegramWorkData.bot.getApi().deleteMyCommands();
+    }
+    catch (...)
+    {
+    }
+
     if (!commandsList.empty())
     {
         std::vector<TgBot::BotCommand::Ptr> commands;
@@ -194,10 +201,8 @@ void TelegramThread::StartTelegramThread(const std::list<CommandInfo>& commandsL
     m_telegramWorkData.bot.getEvents().onUnknownCommand(onUnknownCommand);
     m_telegramWorkData.bot.getEvents().onNonCommandMessage(OnNonCommandMessage);
 
-    m_telegramWorkData.bThreadWorkFlag = true;
-
     EXT_ASSERT(!m_telegramThread.joinable() && "Поток телеграма уже запущен!");
-    m_telegramThread.swap(std::thread(&telegramWorkThread, &m_telegramWorkData));
+    m_telegramThread.run(&telegramWorkThread, &m_telegramWorkData);
 }
 
 //----------------------------------------------------------------------------//
@@ -216,8 +221,9 @@ std::list<std::pair<std::wstring, std::wstring>> TelegramThread::GetCommands() c
 //----------------------------------------------------------------------------//
 void TelegramThread::StopTelegramThread()
 {
-    m_telegramWorkData.bThreadWorkFlag = false;
     m_telegramWorkData.errorHandler = nullptr;
+    if (m_telegramThread.joinable())
+        m_telegramThread.interrupt_and_join();
 }
 
 //----------------------------------------------------------------------------//
@@ -238,7 +244,7 @@ void TelegramThread::SendMessage(const std::list<int64_t>& chatIds, const std::w
         catch (std::exception& e)
         {
             OutputDebugStringA(std::string_sprintf("Error SendMessage: %s\n", e.what()).c_str());
-            sendAlert(m_telegramWorkData.errorHandler, "Ошибка отправки сообщения: %s\n", e.what());
+            sendAlert(m_telegramWorkData.errorHandler, "Failed to send message: %s\n", e.what());
         }
     }
 }
@@ -269,7 +275,7 @@ const TgBot::Api& TelegramThread::GetBotApi()
 }
 
 //----------------------------------------------------------------------------//
-void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...)
+void sendAlert(const TelegramErrorHandler& errorHandler, const char* format, ...)
 {
     if (!errorHandler)
         return;
@@ -287,10 +293,10 @@ void sendAlert(const TelegramErrorHandler& errorHandler, const char *format, ...
 
     /* Write original message to string */
     va_start(arg, format);
-    vsnprintf(str.data(), len+1, format, arg);
+    vsnprintf(str.data(), len + 1, format, arg);
     va_end(arg);
 
-    errorHandler(std::wstring(ATL::CA2W(str.c_str())));
+    errorHandler(std::widen(str.c_str()));
 }
 
 //----------------------------------------------------------------------------//
